@@ -3,7 +3,7 @@ Title: Rpython
 Version: 0.0.0.9000
 Authors@R: person('Jixing', 'Liu', email = 'jixing475@163.com', role = c('cre', 'aut'))
 Description: Python 训练模型, shiny 构建应用, R和 python 的无缝对接. 
-License: What license is it under?
+License: MIT + file LICENSE
 Imports: 
     config,
     golem,
