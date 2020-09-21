@@ -1,0 +1,109 @@
+---
+title: "R & python"
+description: |
+  使用 python 训练模型, 使用 R 创建应用.
+author:
+  - name: Jixing Liu
+    url: https://jixing.netlify.com/
+    affiliation: DeepDrug
+    affiliation_url: http://www.deepdrug.cn/en/
+date: "`r Sys.Date()`"
+#bibliography: biblio.bib  
+output:
+  radix::radix_article:
+    css: Blog_Template_Style.css
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    self_contained: true
+  md_document:
+always_allow_html: yes
+#bibliography: ./../../references.bib
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo = TRUE,      # Output code chunks
+    message = TRUE,  # Toggle off message output 
+    warning = TRUE,    # Toggle off warning output
+    fig.width = 6, fig.asp = 0.618, out.width = "70%", fig.align = "center") 
+
+knitr::opts_knit$set(root.dir = usethis::proj_path())
+library(docknitr)
+
+# libraries used in report
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+
+theme_set(theme_light(base_family = "Avenir"))
+```
+
+
+## install and setup
+
+```{r}
+# library(reticulate)
+reticulate::use_python("/Users/zero/anaconda3/envs/reticulate/bin/python3",
+                       required = TRUE)
+reticulate::py_config()
+#reticulate::repl_python()
+
+#virtualenv_install("debunk", packages = c("pandas", "scikit-learn"))
+#pandas <- import("pandas")
+
+```
+
+## create model
+
+```{python}
+# load module
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.svm import SVC
+
+from joblib import dump
+from pyprojroot import here
+
+# load data
+cancer = load_breast_cancer()
+X_train, X_test, y_train, y_test = train_test_split(
+    cancer.data, cancer.target, random_state=42)
+scaler = MinMaxScaler().fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# learn an SVM on the scaled training data
+svm = SVC()
+svm.fit(X_train_scaled, y_train)
+
+# save model
+dump(svm, here("analysis/data/derived_data/python_model.joblib", warn=False))
+dump(X_test_scaled, here("analysis/data/derived_data/test_data.joblib", warn=False))
+
+```
+
+## load model and use 
+
+
+```{python}
+from joblib import load
+from pyprojroot import here
+
+python_model = load(here("analysis/data/derived_data/python_model.joblib"))
+test_data = load(here("analysis/data/derived_data/test_data.joblib"))
+
+```
+
+```{python}
+python_model
+test_data
+```
+
+可以使用 R 来加载 python 的模型吗?
+
+
+
+

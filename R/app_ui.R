@@ -10,7 +10,23 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # List the first level UI elements here 
     fluidPage(
-      h1("Rpython")
+      h1("Rpython"),
+      titlePanel("Scikit-learn Breast Cancer Data"),
+      
+      fluidRow(
+        column(2,
+               sliderInput("test_cases",
+                           "Number test cases:",
+                           min = 1,
+                           max = nrow(test_data),
+                           value = 1),
+               verbatimTextOutput("prediction")
+        ),
+        column(10,
+               plotOutput("barplot"),
+               verbatimTextOutput("python_config")
+        )
+      )
     )
   )
 }
