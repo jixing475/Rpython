@@ -24,8 +24,8 @@ run_app <- function(...) {
   rm(list = ls())
   reticulate::source_python("drake/02-load_model.py")
   
-  py$python_model # python objects can be found under py$
-  test_data  
+  # py$python_model # python objects can be found under py$
+  # test_data  
   
   # app
   with_golem_options(app = shinyApp(ui = app_ui,

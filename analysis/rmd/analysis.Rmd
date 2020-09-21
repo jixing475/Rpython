@@ -47,7 +47,9 @@ theme_set(theme_light(base_family = "Avenir"))
 # library(reticulate)
 reticulate::use_python("/Users/zero/anaconda3/envs/reticulate/bin/python3",
                        required = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
 reticulate::py_config()
+
 #reticulate::repl_python()
 
 #virtualenv_install("debunk", packages = c("pandas", "scikit-learn"))
@@ -56,6 +58,8 @@ reticulate::py_config()
 ```
 
 ## create model
+
+存成 `drake/01-create_model.py`脚本文件
 
 ```{python}
 # load module
@@ -87,6 +91,7 @@ dump(X_test_scaled, here("analysis/data/derived_data/test_data.joblib", warn=Fal
 
 ## load model and use 
 
+存成 `drake/02-load_model.py`脚本文件
 
 ```{python}
 from joblib import load
@@ -97,12 +102,81 @@ test_data = load(here("analysis/data/derived_data/test_data.joblib"))
 
 ```
 
-```{python}
-python_model
-test_data
+
+可以使用 R 来加载 python 的模型吗? 当然可以
+
+## predict
+
+这里要注意如果是一个病人, R 会自动转变为向量, 所以要使用`t()`进行转秩.
+
+```{r}
+# test_data 的行是病人, 列是变量(feature)
+py$test_data[1,] %>%
+    t() %>%
+  py$python_model$predict()
 ```
 
-可以使用 R 来加载 python 的模型吗?
+对于多个病人则不需要进行格式转换
+
+```{r}
+test_data[1:6,] %>% py$python_model$predict()
+```
+
+##  🐳  原型构建和测试
+
+在这里构建 shiny 的模块原型
+
+### 先设置和shiny APP一样的环境
+
+这个一般是 `run_app` 函数的前半部分, 以及一些 `ui` 的变量设置, 作为 `server`的输入.
+
+```{r}
+library(shiny)
+library(ggplot2)
+library(reticulate)
+
+reticulate::use_python("/Users/zero/anaconda3/envs/reticulate/bin/python3",
+                       required = TRUE)
+knitr::knit_engines$set(python = reticulate::eng_python)
+
+reticulate::py_config()
+
+if (fs::file_exists("analysis/data/derived_data/python_model.joblib")) {
+  print("Python model already exists, no need to re-run python script.")
+} else {
+  print("Python model does not exist, running python model creation script")
+  reticulate::source_python("drake/01-create_model.py")
+}
+
+rm(list = ls())
+reticulate::source_python("drake/02-load_model.py")
+
+```
+
+### 构建预测模块
+
+```{r}
+predict_y <- py$python_model$predict(test_data)
+```
+
+### 画图
+
+```{r}
+predict_y %>% 
+  enframe() %>% 
+  ggplot(aes(value)) +
+  geom_bar()
+```
+
+
+
+
+
+
+
+
+
+
 
 
 

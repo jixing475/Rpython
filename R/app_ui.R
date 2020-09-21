@@ -14,7 +14,8 @@ app_ui <- function(request) {
       titlePanel("Scikit-learn Breast Cancer Data"),
       
       fluidRow(
-        column(2,
+        #
+        column(width = 2,
                sliderInput("test_cases",
                            "Number test cases:",
                            min = 1,
@@ -22,7 +23,8 @@ app_ui <- function(request) {
                            value = 1),
                verbatimTextOutput("prediction")
         ),
-        column(10,
+        # 
+        column(width = 10,
                plotOutput("barplot"),
                verbatimTextOutput("python_config")
         )
