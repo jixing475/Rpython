@@ -44,10 +44,10 @@ theme_set(theme_light(base_family = "Avenir"))
 ## install and setup
 
 ```{r}
-# library(reticulate)
+library(reticulate)
 reticulate::use_python("/Users/zero/anaconda3/envs/reticulate/bin/python3",
                        required = TRUE)
-knitr::knit_engines$set(python = reticulate::eng_python)
+
 reticulate::py_config()
 
 #reticulate::repl_python()
@@ -102,8 +102,16 @@ test_data = load(here("analysis/data/derived_data/test_data.joblib"))
 
 ```
 
+```{r}
+py$test_data
+```
+
 
 可以使用 R 来加载 python 的模型吗? 当然可以
+```{r}
+reticulate::source_python("drake/02-load_model.py")
+```
+
 
 ## predict
 
@@ -168,7 +176,21 @@ predict_y %>%
   geom_bar()
 ```
 
+### 上传文件, 并预测
 
+```{r}
+reticulate::source_python("drake/02-load_model.py")
+rio::export(test_data, "analysis/data/raw_data/test_data.csv")
+```
+
+
+```{r}
+reticulate::source_python("drake/02-load_model.py")
+# load
+df <- rio::import("analysis/data/raw_data/test_data.csv")
+# predict
+py$python_model$predict(df)
+```
 
 
 
